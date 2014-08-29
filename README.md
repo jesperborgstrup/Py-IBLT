@@ -1,6 +1,6 @@
 # Py-IBLT
 
-A Python implementation of [http://arxiv.org/abs/1101.2245](Invertible Bloom Lookup Tables)
+A Python implementation of [(Invertible Bloom Lookup Tables]http://arxiv.org/abs/1101.2245)
 
 ## Invertible Bloom Lookup Table
 From the abstract of the paper (2011):
