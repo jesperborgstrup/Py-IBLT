@@ -69,7 +69,7 @@ assert t.get( "delkey" ) == ( IBLT.RESULT_GET_DELETED_MATCH, "delval" )
 # Test if inserting more that m=30 keys/values will result in an incomplete listing
 # and then remove some of them again to get a complete listing
 t = IBLT( 30, 4, 10, 10 )
-pairs = [( "key%d" % i, "value%d" % i ) for i in range( 31 )]
+pairs = [( "key%d" % i, "value%d" % i ) for i in range( 1031 )]
 for key, value in pairs:
 	t.insert( key, value )
 
