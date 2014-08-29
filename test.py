@@ -24,5 +24,28 @@
 
 from iblt import IBLT
 
-t = IBLT()
-print t
+t = IBLT( 30, 4, 10, 10 )
+
+# Test if inserting and deleting results in an empty table
+#print t
+#print t.T
+#print
+for i in range( 24 ):
+	t.insert( "key%d" % i, "val%d" % i )
+#t.dump()
+#print t.T
+print t.list_entries()
+print len( t.list_entries() )
+print t.get( "ksey" )
+print t.get( "key" )
+print
+#t.delete( "ksey", "val" )
+#print t.T
+#print
+#print t.get( "ksey" )
+#print t.get( "key" )
+
+#t.list_entries()
+
+#for i in range( 5 ):
+#print  "%d: %s" % ( i, t.hash( i, "hej") )
