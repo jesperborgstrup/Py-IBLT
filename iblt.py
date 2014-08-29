@@ -55,7 +55,6 @@ class IBLT:
 		self.hash = hash if hash is not None else self.__hash
 
 	def insert( self, key, value ):
-		print "Inserting %s" % ( [ key,value ] )
 		indices = set( [self.hash( i, key ) for i in range( self.k ) ] )
 		for index in indices:
 			# Increase count
@@ -70,14 +69,8 @@ class IBLT:
 
 	def __delete( self, T, key, value ):
 		indices = set( [self.hash( i, key ) for i in range( self.k ) ] )
-#		print "DELETE INDICES: %s" % indices
-#		print "BEFORE:"
-#		for index in indices:
-#			print "  - %d: %s" % ( index, T[index] )
 		key_array = self.__value_to_int_array( key, self.key_size )
 		value_array = self.__value_to_int_array( value, self.value_size )
-#		print "Key array:   %s" % key_array
-#		print "Value array:   %s" % value_array
 		for index in indices:
 			# Decrease count
 			T[index][0] -= 1
@@ -85,9 +78,6 @@ class IBLT:
 			T[index][1] = self.__diff_int_arrays( T[index][1], key_array )
 			# Add value to valueSum
 			T[index][2] = self.__diff_int_arrays( T[index][2], value_array )
-#		print "AFTER:"
-#		for index in indices:
-#			print "  - %d: %s" % ( index, T[index] )
 
 	def get( self, key ):
 		indices = set( [self.hash( i, key ) for i in range( self.k ) ] )
@@ -114,22 +104,19 @@ class IBLT:
 				if entry[0] == 1:
 					key = self.__int_array_to_value( entry[1] )
 					value = self.__int_array_to_value( entry[2] )
-#					print "************************************************"
-#					print "i     = %d" % i
-#					print "entry = %s" % entry
-#					print "key   = %s" % key
-#					print "value = %s" % value
 
 					result.append( ( key, value ) )
 					self.__delete( T, key, value )
-#					if i == 0:
-#						raise Exception("STOP")
 					break
 			else:
 				break
+
 		if any( filter( lambda e: e[0] != 0, T ) ):
 			return ( "incomplete", result )
 		return ( "complete", result )
+
+	def is_empty( self ):
+		return all( map( lambda e: e[0] == 0, self.T ) )
 
 	def dump( self ):
 		IBLT.__dump( self.T )
@@ -177,9 +164,3 @@ class IBLT:
 
 	def __int_array_to_value( self, arr ):
 		return "".join( [ chr(i) for i in arr if i != 0 ] )
-
-	def __bin2int( self, bin ):
-		return sum(int(n)*2**i for i, n in zip(range(len(bin)), bin[::-1]))
-
-	def __int2bin( self, i ):
-		return "not defined"

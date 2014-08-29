@@ -25,27 +25,24 @@
 from iblt import IBLT
 
 t = IBLT( 30, 4, 10, 10 )
+assert t.is_empty()
 
-# Test if inserting and deleting results in an empty table
-#print t
-#print t.T
-#print
-for i in range( 24 ):
-	t.insert( "key%d" % i, "val%d" % i )
-#t.dump()
-#print t.T
-print t.list_entries()
-print len( t.list_entries() )
-print t.get( "ksey" )
-print t.get( "key" )
-print
-#t.delete( "ksey", "val" )
-#print t.T
-#print
-#print t.get( "ksey" )
-#print t.get( "key" )
+# Test if inserting and deleting the same pair in an empty table
+# results in an empty table again
+t.insert( "testkey", "testvalue" )
+assert not t.is_empty()
+t.delete( "testkey", "testvalue" )
+assert t.is_empty()
 
-#t.list_entries()
-
-#for i in range( 5 ):
-#print  "%d: %s" % ( i, t.hash( i, "hej") )
+# Test if inserting 10 key/value pairs can be listed out
+pairs = [( "key%d" % i, "value%d" % i ) for i in range( 10 )]
+for key, value in pairs:
+	t.insert( key, value )
+entries = t.list_entries()
+assert entries[0] == 'complete'
+# Get set intersection, should contain all elements from pairs
+intersect = set(pairs) & set(entries[1])
+assert set( pairs ) == intersect
+# Get set union, should contain only the elements from pairs
+union = set(pairs) | set(entries[1])
+assert set( pairs ) == union
