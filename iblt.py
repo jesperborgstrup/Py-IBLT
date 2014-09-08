@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import hashlib, math
+import hashlib, math, struct
 from copy import deepcopy
 
 class IBLT:
@@ -169,17 +169,6 @@ class IBLT:
 						deleted_entries.append( ( key, value ) )
 						self.__insert( T, key, value )
 						break
-					elif entry[0] == -1:
-						print "********************************************************************"
-						print "Found count: %d" % entry[0]
-						print entry[3]
-						print self.__negate_int_array( entry[3] )
-						print
-						print entry[1]
-						print self.__negate_int_array( entry[1] )
-						print self.__int_array_to_value( self.__negate_int_array( entry[1] ) )
-						print IBLT.get_key_hash( self.__int_array_to_value( self.__negate_int_array( entry[1] ) ) )
-						print self.__value_to_int_array( IBLT.get_key_hash( self.__int_array_to_value( self.__negate_int_array( entry[1] ) ) ), self.hash_key_sum_size )
 			else:
 				break
 
@@ -193,6 +182,89 @@ class IBLT:
 		inserted or deleted
 		"""
 		return all( map( lambda e: e[0] == 0, self.T ) )
+
+	def serialize( self ):
+		"""
+		Serialize the IBLT for storage or transfer.
+
+		Data format:
+			[ Magic bytes ][  Header ][ Data ]
+		    	4 bytes      7 bytes    
+
+		Magic bytes: 
+			0x49 0x42 0x4C 0x54 (ASCII for IBLT)
+
+		Header:
+			[ Cell count (m) ]
+			  	32-bit uint
+
+			[ Key sum length ][ Value sum length ]
+			  	32-bit uint			32-bit uint
+
+			[ HashKeySum length ][ ValueKeySum length ]
+				32-bit uint				32-bit uint
+
+			[ # hash funcs (k) ]
+				32-bit uint
+
+		Data:
+			For each of the m cells:
+				[ 	Count 	 ][ keySum ][ valueSum ][ hashKeySum ][ valueKeySum ]
+				  32-bit int
+
+		"""
+		magic = struct.pack( ">I", 0x49424C54 )
+		header = struct.pack( ">IIIIII", self.m, self.key_size, self.value_size, 
+										 self.hash_key_sum_size, 0, self.k )
+		data = ""
+		for cell in self.T:
+			# Count (32-bit signed int)
+			data += struct.pack( ">i", cell[0] )
+			# keySum
+			data += "".join( map( lambda n: struct.pack( ">B", n ), cell[1] ) )
+			# valueSum
+			data += "".join( map( lambda n: struct.pack( ">B", n ), cell[2] ) )
+			# hashKeySum
+			data += "".join( map( lambda n: struct.pack( ">B", n ), cell[3] ) )
+
+		return magic + header + data
+
+	@staticmethod
+	def unserialize( data ):
+		header = struct.unpack( ">IIIIIII", data[:(4*7)] )
+		magic = header[0]
+		if magic != 0x49424C54:
+			raise Exception( "Invalid magic value" )
+
+		m, key_size, value_size, hash_key_sum_size, hash_value_sum_size, k = header[1:7]
+		t = IBLT( m, k, key_size, value_size, hash_key_sum_size )
+
+		expected_data_length = m * ( 4 + key_size + value_size + hash_key_sum_size + hash_value_sum_size )
+		if len( data ) - 28 != expected_data_length:
+			raise Exception( "Invalid data size: Expected %d, was %d" % ( expected_data_length, len( data ) - 28 ) )
+
+		# 4 x 7 bytes offset from magic value and header
+		offset = 28
+		for i in range( m ):
+			t.T[i][0] = struct.unpack( ">i", data[offset:offset+4])[0]
+			offset += 4
+			t.T[i][1] = map( lambda c: struct.unpack( ">B", c )[0], data[offset:offset+key_size] )
+			offset += key_size
+			t.T[i][2] = map( lambda c: struct.unpack( ">B", c )[0], data[offset:offset+value_size] )
+			offset += value_size
+			t.T[i][3] = map( lambda c: struct.unpack( ">B", c )[0], data[offset:offset+hash_key_sum_size] )
+			offset += hash_key_sum_size
+
+		return t
+
+	def get_serialized_size( self ):
+		# Magic bytes
+		result = 4
+		# Header
+		result += 6 * 4
+		# Cells
+		result += self.m * ( 4 + self.key_size + self.value_size + self.hash_key_sum_size )
+		return result
 
 	def dump( self ):
 		IBLT.__dump( self.T )
@@ -246,3 +318,24 @@ class IBLT:
 
 	def __negate_int_array( self, arr ):
 		return map( lambda i: (256-i) % 256, arr )
+
+	def __eq__( self, other ):
+		# Check if correct class
+		if not isinstance( other, IBLT ):
+			return False
+
+		# Check if variables match
+		if not all( ( ( self.m == other.m ),
+					  ( self.k == other.k ),
+				      ( self.key_size == other.key_size ),
+				 	  ( self.value_size == other.value_size ),
+					  ( self.hash_key_sum_size == other.hash_key_sum_size ),
+					  ( len( self.T ) == len( other.T ) ) ) ):
+			return False
+
+		# Check if actual data match
+		for i in xrange( self.m ):
+			c1, c2 = self.T[i], other.T[i]
+			if c1 != c2:
+				return False
+		return True
