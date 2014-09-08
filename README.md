@@ -10,6 +10,7 @@ We present a version of the Bloom filter data structure that supports not only t
 ## Notes
 
 * Records that are deleted without a corresponding insert operation can be recovered with the `get` and `list_entries` functions. 
+* Error detection using `hashValueSum` as described in the paper is currently not implemented.
 * Duplicate keys are not supported.
 
 ## Usage
@@ -91,4 +92,33 @@ s = t.serialize()
 
 # Prints True
 print IBLT.unserialize( s ) == t
+```
+
+The format of the serialized table can be found in the comments for the `serialize` function.
+
+#### Serialized data format:
+```
+	[ Magic bytes ][  Header ][ Data ]
+    	4 bytes      7 bytes    
+
+Magic bytes: 
+	0x49 0x42 0x4C 0x54 (ASCII for IBLT)
+
+Header:
+    [ Cell count (m) ]
+         32-bit uint
+
+    [ Key sum length ][ Value sum length ]
+        32-bit uint	      32-bit uint
+
+    [ HashKeySum length ][ ValueKeySum length ]
+        32-bit uint           32-bit uint
+
+    [ # hash funcs (k) ]
+        32-bit uint
+
+Data:
+    For each of the m cells:
+        [ 	Count 	 ][ keySum ][ valueSum ][ hashKeySum ][ valueKeySum ]
+          32-bit int
 ```
