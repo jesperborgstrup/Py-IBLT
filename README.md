@@ -94,12 +94,10 @@ s = t.serialize()
 print IBLT.unserialize( s ) == t
 ```
 
-The format of the serialized table can be found in the comments for the `serialize` function.
-
 #### Serialized data format:
 ```
-	[ Magic bytes ][  Header ][ Data ]
-    	4 bytes      7 bytes    
+	[ Magic bytes ][  Header  ][ Data ]
+    	4 bytes      24 bytes    
 
 Magic bytes: 
 	0x49 0x42 0x4C 0x54 (ASCII for IBLT)

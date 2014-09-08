@@ -189,7 +189,7 @@ class IBLT:
 
 		Data format:
 			[ Magic bytes ][  Header ][ Data ]
-		    	4 bytes      7 bytes    
+		    	4 bytes      6 bytes    
 
 		Magic bytes: 
 			0x49 0x42 0x4C 0x54 (ASCII for IBLT)
