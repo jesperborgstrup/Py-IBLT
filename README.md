@@ -79,3 +79,16 @@ The `<Result>` value is one of two possibilities:
 The `<Entries>` list contains all recoverable entries that have been inserted into the table.
 Likewise, the `<Deleted entries>` list contains all recoverable entries that have been deleted from the table without being inserted.
 
+### Serializing and unserializing
+
+Table instances have a `serialize` function, that takes no argument and serializes the data and metadata of the table for into a bitstring storage or communication.
+
+Likewise, the IBLT class has a static `unserialize` function that takes the serialized bitstring and constructs a copy of the table from the bitstring.
+
+```
+# t is an IBLT instance
+s = t.serialize()
+
+# Prints True
+print IBLT.unserialize( s ) == t
+```
