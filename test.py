@@ -81,8 +81,13 @@ for key, value in pairs_to_delete:
 
 entries = t.list_entries()
 assert entries[0] == IBLT.RESULT_LIST_ENTRIES_COMPLETE
+
 assert len( entries[1] ) == len( pairs_to_keep )
 # Check if returned entries are the same as in pairs_to_keep
 assert len( set( entries[1] ).difference( set( pairs_to_keep ) ) ) == 0
 # Check that returned entries contains none of the pairs_to_delete
 assert len( set( entries[1] ).intersection( set( pairs_to_delete ) ) ) == 0
+
+
+# Test that serializing and unserializing works
+assert t == IBLT.unserialize( t.serialize() )
