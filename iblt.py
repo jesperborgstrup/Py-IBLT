@@ -314,7 +314,10 @@ class IBLT:
 		return [ord(value[i]) if i < len( value ) else 0 for i in range( length )]
 
 	def __int_array_to_value( self, arr ):
-		return "".join( [ chr(i) for i in arr if i != 0 ] )
+		val = "".join( [ chr(i) for i in arr ] )
+		# Cut zero bytes from the right, since they are 
+		# not part of the actual value
+		return val.rstrip( '\x00' ) 
 
 	def __negate_int_array( self, arr ):
 		return map( lambda i: (256-i) % 256, arr )
